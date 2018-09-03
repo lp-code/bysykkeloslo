@@ -8,7 +8,7 @@ def read_trip_data(data_dir):
     logger = logging.getLogger(__name__)
     logger.info('Raw data files: %s' % (str(trip_files)))
     df_list = []
-    for trip_file in [trip_files[0]]:
+    for trip_file in trip_files:
         logger.info('Reading: %s' % (trip_file))
         df_list.append(pd.read_csv(data_dir + os.sep + trip_file, compression='zip',
                                    parse_dates=[1, 3], infer_datetime_format=True))
@@ -21,7 +21,8 @@ def read_trip_data(data_dir):
 def augment_trip_data(df):
     df['Duration'] = df['End time'] - df['Start time']
     df['DurationSeconds'] = df['Duration'].dt.total_seconds()
-    
+    df.drop(['Duration'], axis=1, inplace=True) # data type not supported by
+                                                # feather
     return df
 
 

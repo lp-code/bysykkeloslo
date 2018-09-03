@@ -21,9 +21,8 @@ def main(input_filepath, output_filepath):
     df = bysykkel_data.read_trip_data(input_filepath)
     df = bysykkel_data.augment_trip_data(df)
     df = bysykkel_data.remove_invalid_trips(df, max_trip_duration)
-    print(df.head())
-    df.reset_index(inplace=True)
-    print(df.head())
+
+    df.reset_index(inplace=True) # without this feather gives an error
     df.to_feather(os.sep.join([output_filepath, 'trips.feather']))
     
 
