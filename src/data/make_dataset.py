@@ -15,7 +15,7 @@ def main(input_filepath, output_filepath):
         cleaned data ready to be analyzed (saved in ../processed).
     """
     logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+    logger.info('making the interim trip data set from raw data')
 
     max_trip_duration = 7200
     df = bysykkel_data.read_trip_data(input_filepath)
@@ -23,8 +23,11 @@ def main(input_filepath, output_filepath):
     df = bysykkel_data.remove_invalid_trips(df, max_trip_duration)
 
     df.reset_index(inplace=True) # without this feather gives an error
+    logger.info('Write dataframe to feather format.')
     df.to_feather(os.sep.join([output_filepath, 'trips.feather']))
-    
+    logger.info('Write dataframe to csv (zipped).')
+    df.to_csv(os.sep.join([output_filepath, 'trips.csv']),
+              compression='zip')
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
