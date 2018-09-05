@@ -2,20 +2,18 @@
 #import click
 import logging
 from pathlib import Path
-#from dotenv import find_dotenv, load_dotenv
 
 import os
 import bysykkel_data
+import met_data
 
-#@click.command()
-#@click.argument('input_filepath', type=click.Path(exists=True))
-#@click.argument('output_filepath', type=click.Path())
 def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
+    """ Runs data processing scripts to read raw data from (../raw), or get it
+        from the internet, and save it in suitable format into data/interim.
+        That data is read again by the featuer engineering script.
     """
     logger = logging.getLogger(__name__)
-    logger.info('making the interim trip data set from raw data')
+    logger.info('Making the interim trip data set from raw data')
 
     max_trip_duration = 7200
     df = bysykkel_data.read_trip_data(input_filepath)
@@ -25,9 +23,13 @@ def main(input_filepath, output_filepath):
     df.reset_index(inplace=True) # without this feather gives an error
     logger.info('Write dataframe to feather format.')
     df.to_feather(os.sep.join([output_filepath, 'trips.feather']))
-    logger.info('Write dataframe to csv (zipped).')
-    df.to_csv(os.sep.join([output_filepath, 'trips.csv']),
-              compression='zip')
+    #logger.info('Write dataframe to csv (zipped).')
+    #df.to_csv(os.sep.join([output_filepath, 'trips.csv']),
+    #          compression='zip')
+    
+    logger.info('Making the interim weather data set from raw data')
+    met_data.get_met_data(output_filepath)
+    
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
@@ -36,15 +38,8 @@ if __name__ == '__main__':
     # not used in this stub but often useful for finding various files
     project_dir = Path(__file__).resolve().parents[2]
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    #load_dotenv(find_dotenv())
-
-    raw_data_path = os.sep.join(['..', '..', 'data', 'raw'])
-    interim_data_path = os.sep.join(['..', '..', 'data', 'interim'])
-    if not os.path.exists(raw_data_path):
-        raw_data_path = raw_data_path[6:]
-        interim_data_path = interim_data_path[6:]
+    raw_data_path = os.sep.join([str(project_dir), 'data', 'raw'])
+    interim_data_path = os.sep.join([str(project_dir), 'data', 'interim'])
 
     print(raw_data_path, interim_data_path)
     main(raw_data_path, interim_data_path)
