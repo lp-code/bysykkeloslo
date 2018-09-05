@@ -10,16 +10,18 @@ References:
     http://eklima.met.no/Help/Stations/toDay/all/en_stations.html
 """
 
-import sys
+
 import dateutil.parser as dp
-import requests # See http://docs.python-requests.org/
 import numpy as np
+import os
 import pandas as pd
-#from pprint import pprint
+import requests # See http://docs.python-requests.org/
+import sys
+
 import frost_account
 
-if __name__ == "__main__":
 
+def get_met_data(output_dir):
     elements_for_station = {}
     elements_for_station['SN18700'] = [ # Oslo Blindern
             'air_temperature',                          # TA
@@ -116,6 +118,7 @@ if __name__ == "__main__":
         df_dict[station] = pd.concat(df_dict[station].values())
     left, right = df_dict.values()
     df = pd.merge(left, right, left_index=True, right_index=True)
-    df.to_pickle('blindern_met.pck')
+    #df.to_pickle(os.sep.join([output_dir, 'blindern_met.pck']))
     df.reset_index(inplace=True)
-    df.to_feather('blindern_met.feather')
+    df.to_feather(os.sep.join([output_dir, 'blindern_met.feather']))
+    
