@@ -15,10 +15,11 @@ def main(input_filepath, output_filepath):
     logger = logging.getLogger(__name__)
     logger.info('Making the interim trip data set from raw data')
 
-    max_trip_duration = 7200
+    max_trip_duration = 14400
     df = bysykkel_data.read_trip_data(input_filepath)
     df = bysykkel_data.augment_trip_data(df)
     df = bysykkel_data.remove_invalid_trips(df, max_trip_duration)
+    df.sort_values(by='Start time', inplace=True)
 
     df.reset_index(inplace=True) # without this feather gives an error
     logger.info('Write dataframe to feather format.')
@@ -27,8 +28,9 @@ def main(input_filepath, output_filepath):
     #df.to_csv(os.sep.join([output_filepath, 'trips.csv']),
     #          compression='zip')
     
-    logger.info('Making the interim weather data set from raw data')
-    met_data.get_met_data(output_filepath)
+    if False:
+        logger.info('Making the interim weather data set from raw data')
+        met_data.get_met_data(output_filepath)
     
 
 if __name__ == '__main__':
