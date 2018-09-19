@@ -6,6 +6,7 @@ import astropy.coordinates as coord
 from astropy.time import Time
 import time, datetime
 from datetime import datetime, timedelta
+import net_demand
 import os
 import pandas as pd
 from pathlib import Path
@@ -333,24 +334,30 @@ def load_trip_data(from_dir):
 
 
 
-def main(input_filepath, output_filepath):
+def main(input_filepath, output_filepath,
+         process_met_data, process_trip_data):
     """ Runs data processing scripts to read interim data from input_filepath,
         generate features and write to output_filepath.
     """
     logger = logging.getLogger(__name__)
     logger.info('Making the final feature data set from interim data.')
 
-    logger.info('Meteorological data: start')
-    df_met = met_load_data(input_filepath)
-    df_met = met_rename_columns(df_met)
-    df_met = met_transform_wind_direction(df_met)
-    df_met = met_transform_weather(df_met)
-
-    df_met.reset_index(inplace=True) # without this feather gives an error
+    if process_met_data:
+        logger.info('Meteorological data: start')
+        df_met = met_load_data(input_filepath)
+        df_met = met_rename_columns(df_met)
+        df_met = met_transform_wind_direction(df_met)
+        df_met = met_transform_weather(df_met)
     
-    met_write_data(df_met, output_filepath)
-    logger.info('Meteorological data: done')
+        df_met.reset_index(inplace=True) # without this feather gives an error
+        
+        met_write_data(df_met, output_filepath)
+        logger.info('Meteorological data: done')
     
+    if process_trip_data:
+        logger.info('Bicycle data, net demand: start')
+        net_demand.compute_net_demand(input_filepath, output_filepath)
+        logger.info('Bicycle data, net demand: done')
 
 if __name__ == '__main__':
     log_fmt = '%(asctime)s: , # %(name)s: , # %(levelname)s: , # %(message)s'
@@ -362,5 +369,6 @@ if __name__ == '__main__':
     interim_data_path = os.sep.join([str(project_dir), 'data', 'interim'])
     processed_data_path = os.sep.join([str(project_dir), 'data', 'processed'])
 
-    main(interim_data_path, processed_data_path)
+    main(interim_data_path, processed_data_path,
+         process_met_data=False, process_trip_data=True)
 
