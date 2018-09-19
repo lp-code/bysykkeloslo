@@ -316,14 +316,15 @@ def met_transform_weather(df, delete_original=True):
         # First fill weather columns in 3-hour-packs; this will leave the
         # columns that are not activated by the weather_i fields at the initial
         # value nan. Therefore fill the remaining nans with 0.
-        df[translator.cat_name(ic)].fillna(method='ffill', limit=2, inplace=True)
-        df[translator.cat_name(ic)].fillna(value=0, inplace=True)
-        df[translator.cat_name(ic)].astype('category')
+        cat_name = translator.cat_name(ic)
+        df[cat_name].fillna(method='ffill', limit=2, inplace=True)
+        df[cat_name].fillna(value=0, inplace=True)
+        df[cat_name] = df[cat_name].astype('int32')
 
     if delete_original:
         for col in ['weather1', 'weather2', 'weather3']:
             df.drop(columns=col, inplace=True)
-            
+    
     return df
 
 
