@@ -356,7 +356,7 @@ def main(input_filepath, output_filepath,
     
     if process_trip_data:
         logger.info('Bicycle data, net demand: start')
-        net_demand.compute_net_demand(input_filepath, output_filepath)
+        net_demand.compute_net_flow(input_filepath, output_filepath)
         logger.info('Bicycle data, net demand: done')
 
 if __name__ == '__main__':

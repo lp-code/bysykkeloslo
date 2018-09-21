@@ -3,24 +3,23 @@ import os
 import pandas as pd
 import tqdm
 
-pd.options.mode.chained_assignment = None
 
 def find_row(t, t0, delta):
     return int((t - t0) / delta)
 
-def compute_net_demand(input_filepath, output_filepath, timestep=5):
+
+def compute_net_flow(input_filepath, output_filepath, timestep=5):
     # Read from the interim directory.
     df_trips = pd.read_feather(os.sep.join([input_filepath, 'trips.feather']))
-    df_trips.dropna(axis=0, inplace=True)
+    df_trips.dropna(axis=0, inplace=True) # drop lines with missing data, <<1%
 
-    t_start = '2016-04-01 04:00:00'  # must be changed based on the csv-file
-    t_end   = '2018-08-31 22:00:00'  # must be changed based on the csv-file
+    t_start = datetime.datetime(2016,  4,  1,  0,  0,  0, 0)
+    t_end   = datetime.datetime(2018,  8, 31, 23, 59, 59, 0)
     delta = datetime.timedelta(minutes=timestep)
-    t0 = datetime.datetime.strptime(t_start, '%Y-%m-%d %H:%M:%S')
     
-    station_ids_set = set(map(str, df_trips['Start station'])) | set(
-            map(str, df_trips['End station']))
-    station_ids_list = sorted(list(station_ids_set))
+    station_ids_set = set(df_trips['Start station']) | set(
+            df_trips['End station'])
+    station_ids_list = sorted([str(int(x)) for x in station_ids_set])
 
     time_steps = pd.date_range(start=t_start, end=t_end,
                                freq='%dmin' % timestep)
@@ -31,11 +30,13 @@ def compute_net_demand(input_filepath, output_filepath, timestep=5):
     
     for i_trip, row in tqdm.tqdm(df_trips.iterrows(),
                                  total=len(df_trips.index)):
-        i_slot_start = find_row(row['Start time'], t0, delta)
-        df_nd.iloc[i_slot_start][str(row['Start station'])] -= 1 # away from start
-        i_slot_end = find_row(row['End time'], t0, delta)
-        df_nd.iloc[i_slot_end][str(row['End station'])] += 1 # add bike at end
+        i_slot_start = find_row(row['Start time'], t_start, delta)
+        df_nd.iloc[i_slot_start][str(int(row['Start station']))] -= 1 # start
+        i_slot_end = find_row(row['End time'], t_start, delta)
+        df_nd.iloc[i_slot_end][str(int(row['End station']))] += 1 # trip end
 
     df_nd.reset_index(inplace=True)
-    df_nd.to_feather(os.sep.join([output_filepath, 'net_demand.feather']))
+    df_nd['index'] = df_nd['index'].dt.tz_localize('UTC')
+    df_nd.to_feather(os.sep.join([output_filepath, 'net_flow.feather']))
+    df_nd.to_csv(os.sep.join([output_filepath, 'net_flow.csv']))
     
