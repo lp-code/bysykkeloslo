@@ -1,5 +1,4 @@
 #!/usr/bin/python
-
 """
 To run this code you must have a file frost_account.py accessible in your
 python path directories, which contains a variable client_id with the id
@@ -9,19 +8,17 @@ References:
     https://frost.met.no/elementtable
     http://eklima.met.no/Help/Stations/toDay/all/en_stations.html
 """
-
-
 import dateutil.parser as dp
 import numpy as np
 import os
 import pandas as pd
 import requests # See http://docs.python-requests.org/
-import sys
+# import sys
 
 import frost_account
 
 
-def get_met_data(output_dir):
+def get_met_data(season, output_dir):
     elements_for_station = {}
     elements_for_station['SN18700'] = [ # Oslo Blindern
             'air_temperature',                          # TA
@@ -50,13 +47,16 @@ def get_met_data(output_dir):
 
     # The time interval on frost is given as UTC, trip data is in local time.
     # CEST = UTC + 2 h
+    # CET  = UTC + 1 h
     # But since we do not consider the time from 0 to 04 on the first day,
     # we do not need extra data because of UTC-CE(S)T conversion.
-    time_intervals = ['2016-04-01T00:00/2016-12-31T23:59',
-                      '2017-04-01T00:00/2017-12-31T23:59',
-                      '2018-03-01T00:00/2018-08-31T23:59',
-                      ]
-    
+    time_intervals = [season[year]['start'].strftime('%Y-%m-%dT%H:%M')+'/'+
+                      season[year]['end'].strftime(  '%Y-%m-%dT%H:%M')
+                      for year in season.keys()]
+#      '2016-04-01T00:00/2016-12-31T23:59',
+#      '2017-04-01T00:00/2017-12-31T23:59',
+#      '2018-03-01T00:00/2018-08-31T23:59',
+
     get_met_data = True
     verbose = False
     df_dict = {}
@@ -98,7 +98,8 @@ def get_met_data(output_dir):
                         time_index += 1
                         
                         if verbose:
-                            datetime_str = datetime_obj.strftime('%Y-%m-%d %H:%M:%S%z')
+                            datetime_str = datetime_obj.strftime(
+                                '%Y-%m-%d %H:%M:%S%z')
                             sys.stdout.write('{}\n'.format(datetime_str))
         
                     df_dict[station][time_interval] = pd.DataFrame(
@@ -110,8 +111,10 @@ def get_met_data(output_dir):
                     sys.stdout.write('\tstatus code: {}\n'.format(r.status_code))
                     if 'error' in r.json():
                         assert(r.json()['error']['code'] == r.status_code)
-                        sys.stdout.write('\tmessage: {}\n'.format(r.json()['error']['message']))
-                        sys.stdout.write('\treason: {}\n'.format(r.json()['error']['reason']))
+                        sys.stdout.write('\tmessage: {}\n'.format(
+                            r.json()['error']['message']))
+                        sys.stdout.write('\treason: {}\n'.format(
+                            r.json()['error']['reason']))
                     else:
                         sys.stdout.write('\tother error\n')
         
@@ -121,4 +124,5 @@ def get_met_data(output_dir):
     #df.to_pickle(os.sep.join([output_dir, 'blindern_met.pck']))
     df.reset_index(inplace=True)
     df.to_feather(os.sep.join([output_dir, 'blindern_met.feather']))
+    df.to_csv(os.sep.join([output_dir, 'blindern_met.csv']))
     
