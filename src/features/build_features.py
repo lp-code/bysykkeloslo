@@ -51,9 +51,9 @@ def met_transform_wind_direction(df, delete_original=True):
         df.drop(columns='wind_direction', inplace=True)
     return df
 
-def calculate_elevation(time,loc):
-    sun_time = Time(time)
-    if ( (time.hour == 0) and (time.minute == 0) ):
+def calculate_elevation(tt, loc):
+    sun_time = Time(tt)
+    if ( (tt.hour == 0) and (tt.minute == 0) ):
         print(f'Calculate solar elevation angle for: {time}')
     zen_ang = coord.get_sun(sun_time).transform_to(coord.AltAz(obstime=sun_time, location=loc)).alt.degree
     return zen_ang
@@ -88,9 +88,9 @@ def elev_calculate_elevation(df, df_times,loc):
 
     df_elev = []
     df_elev_cat = []
-    for time in df_times:
+    for tt in df_times:
 
-        elev = calculate_elevation(time,loc)
+        elev = calculate_elevation(tt,loc)
         elev_cat = elevation_to_category(elev,degrees_per_cat,nr_of_categories)
         df_elev.append(elev)
         df_elev_cat.append(elev_cat)
@@ -312,20 +312,50 @@ def met_transform_weather(df, delete_original=True):
                 met_code = int(row[col])
                 cat = translator.met2cat(met_code)
                 df.loc[index, translator.cat_name(cat)] = 1
-                
+
+    if delete_original:
+        for col in ['weather1', 'weather2', 'weather3']:
+            df.drop(columns=col, inplace=True)
+
+    return df
+
+
+def met_fill_columns(df):
+    time_delta_minutes = 5
+    t_start = '2016-04-01 00:00:00'
+    t_end   = '2018-09-01 00:00:00'
+    translator = WMO4677_translator()
+
+    df_date = pd.DataFrame(
+            {'DateTime': pd.date_range(start=t_start, end=t_end,
+                                       freq='%dmin' % time_delta_minutes,
+                                       tz='utc')})
+    df = pd.merge(df_date, df,
+                  left_on='DateTime', right_on='index', how='left')
+    df.drop(columns='index', inplace=True)
+    
     for ic in range(translator.nr_of_categories()):
         # First fill weather columns in 3-hour-packs; this will leave the
         # columns that are not activated by the weather_i fields at the initial
         # value nan. Therefore fill the remaining nans with 0.
         cat_name = translator.cat_name(ic)
-        df[cat_name].fillna(method='ffill', limit=2, inplace=True)
+        df[cat_name].fillna(method='ffill',
+                            limit=int(2 * 60 / time_delta_minutes - 1),
+                            inplace=True) # 2 hours fill down
         df[cat_name].fillna(value=0, inplace=True)
         df[cat_name] = df[cat_name].astype('int32')
 
-    if delete_original:
-        for col in ['weather1', 'weather2', 'weather3']:
-            df.drop(columns=col, inplace=True)
-    
+    for var in ['temperature', 'wind_speed', 'humidity', 'sunshine', 'precipitation']:
+        df[var].interpolate(method='linear', inplace=True)
+    for var in ['wind_direction_cat',
+                'weather_fair/cloudy', 'weather_fog/haze',
+                'weather_thunderstorm', 'weather_rain',
+                'weather_snow', 'weather_other']:
+        df[var].fillna(method='ffill', limit=11, inplace=True)
+    # wind direction is sometimes missing for an hour, so continue with the
+    # same direction as before
+    df['wind_direction_cat'].fillna(method='ffill', limit=24, inplace=True)
+
     return df
 
 
@@ -348,7 +378,8 @@ def main(input_filepath, output_filepath,
         df_met = met_rename_columns(df_met)
         df_met = met_transform_wind_direction(df_met)
         df_met = met_transform_weather(df_met)
-    
+        df_met = met_fill_columns(df_met)
+        
         df_met.reset_index(inplace=True) # without this feather gives an error
         
         met_write_data(df_met, output_filepath)
@@ -370,5 +401,5 @@ if __name__ == '__main__':
     processed_data_path = os.sep.join([str(project_dir), 'data', 'processed'])
 
     main(interim_data_path, processed_data_path,
-         process_met_data=False, process_trip_data=True)
+         process_met_data=True, process_trip_data=False)
 
