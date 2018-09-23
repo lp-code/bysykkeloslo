@@ -7,7 +7,7 @@ from pathlib import Path
 project_dir = os.sep.join([os.getcwd(), '..', '..'])
 sys.path.append(os.sep.join([project_dir, 'src']))
 from bysykkel_parameters import service_season
-import met_data
+import met_raw
 
 def main(output_filepath, get_met_data=False):
     """ Get data for the project.
