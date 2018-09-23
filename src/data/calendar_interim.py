@@ -8,10 +8,6 @@ from dateutil.tz import tzutc
 
 project_dir = os.sep.join([os.getcwd(), '..'])
 
-time_delta_minutes = 5
-t_start = '2016-04-01 00:00:00'
-t_end   = '2018-09-01 00:00:00'
-
 _public_holidays = [
     # 2016
     '2016-01-01', # Første nyttårsdag
@@ -86,7 +82,7 @@ def _is_school_holiday(row):
     return 0
 
 
-def create_calendar_df(yearly_ranges, time_delta_minutes):
+def create_calendar_df(yearly_ranges, summertime_season, time_delta_minutes):
 
     # concat for several years with a different range each
     df_date = [pd.DataFrame(
@@ -102,6 +98,18 @@ def create_calendar_df(yearly_ranges, time_delta_minutes):
     df_date['month'] = df_date['DateTime'].dt.month
     df_date['public_holiday'] = df_date.apply(_is_public_holiday, axis=1)
     df_date['school_holiday'] = df_date.apply(_is_school_holiday, axis=1)
+
+    # The 'hour' column should have the local time full hour.
+    # CEST = UTC + 2 h
+    # CET  = UTC + 1 h
+    df_date['hour'] = df_date['hour'] + 1 # whole year
+    for yr in summertime_season:
+        mask = (df_date.DateTime > summertime_season[yr]['start'])& \
+               (df_date.DateTime < summertime_season[yr]['end'])
+        df_date.loc[mask, 'hour'] = df_date.loc[mask, 'hour'] + 1
+    # Note that we may now have hours > 23. These have to be filtered out
+    # together with the closing hours (0-6 local time) of the scheme.
+    df_date = df_date[(df_date.hour >= 6)&(df_date.hour <= 23)]
 
     # Turn data into categorical.
     category_variable_list = ['hour', 'weekday', 'month', 'school_holiday',

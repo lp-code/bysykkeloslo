@@ -124,5 +124,5 @@ def get_met_data(season, output_dir):
     #df.to_pickle(os.sep.join([output_dir, 'blindern_met.pck']))
     df.reset_index(inplace=True)
     df.to_feather(os.sep.join([output_dir, 'blindern_met.feather']))
-    df.to_csv(os.sep.join([output_dir, 'blindern_met.csv']))
+    df.to_csv(os.sep.join([output_dir, 'blindern_met.csv']), index=False)
     

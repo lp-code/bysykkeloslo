@@ -2,20 +2,20 @@
 
 import logging
 import os
+import pandas as pd
 from pathlib import Path
 import sys
 
 import bysykkel_data
 import calendar_interim
+import met_interim
 
 project_dir = os.sep.join([os.getcwd(), '..', '..'])
 sys.path.append(os.sep.join([project_dir, 'src']))
-from bysykkel_parameters import max_trip_duration_seconds, service_season, time_delta_minutes
+import bysykkel_parameters
 
-def main(input_dir, output_dir,
-         process_bike_data=False,
-         create_calendar=True,
-         process_met_data=False):
+def main(input_dir, output_dir, process_bike_data,
+         create_calendar, process_met_data):
     """ Runs data processing scripts to process raw data and save it in suitable
         format into data/interim.
         That data is read again by the feature engineering script.
@@ -27,7 +27,8 @@ def main(input_dir, output_dir,
 
         df = bysykkel_data.read_trip_data(input_dir)
         df = bysykkel_data.augment_trip_data(df) # computes duration
-        df = bysykkel_data.remove_invalid_trips(df, max_trip_duration_seconds)
+        df = bysykkel_data.remove_invalid_trips(
+            df, bysykkel_parameters.max_trip_duration_seconds)
         df.sort_values(by='Start time', inplace=True)
     
         df.reset_index(inplace=True) # without this feather gives an error
@@ -35,17 +36,31 @@ def main(input_dir, output_dir,
         df.to_feather(os.sep.join([output_dir, 'trips.feather']))
         df.to_csv(os.sep.join([output_dir, 'trips.csv']), compression='zip')
 
-    if create_calendar:
+    if create_calendar: # need datetime for interim met df
         logger.info('Create datetime dataframe.')
-        df_date = calendar_interim.create_calendar_df(service_season,
-                                                      time_delta_minutes)
+        df_date = calendar_interim.create_calendar_df(
+            bysykkel_parameters.service_season,
+            bysykkel_parameters.summertime_season,
+            bysykkel_parameters.time_delta_minutes)
         logger.info('Write datetime info to interim, %d lines.')
         # df_date.to_feather(os.sep.join([output_dir, 'days.feather']))
-        df_date.to_csv(os.sep.join([output_dir, 'days.csv']))
+        df_date.to_csv(os.sep.join([output_dir, 'days.csv']), index=False)
 
     if process_met_data:
         logger.info('Get met data from raw.')
-        #output_filepath)
+        df_met = pd.read_feather(os.sep.join([input_dir,
+                                              'blindern_met.feather']))
+        df_date = pd.read_csv(os.sep.join([output_dir, # from interim!!!
+                                           'days.csv']),
+                              parse_dates=[0], infer_datetime_format=True)
+        df_date['DateTime'] = df_date['DateTime'].dt.tz_localize('UTC')
+
+        df_met = met_interim.fill_met_data(
+            df_met, df_date, bysykkel_parameters.time_delta_minutes)
+        df_met = met_interim.transform_variables(df_met)
+
+        df_met.to_csv(os.sep.join([output_dir, 'blindern_interim.csv']))
+        df_met.to_feather(os.sep.join([output_dir, 'blindern_interim.feather']))
         logger.info('Done writing met data interim file.')
 
 if __name__ == '__main__':
@@ -61,4 +76,4 @@ if __name__ == '__main__':
     main(raw_data_path, interim_data_path,
          process_bike_data=False,
          create_calendar=True,
-         process_met_data=False)
+         process_met_data=True)

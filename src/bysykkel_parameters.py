@@ -23,7 +23,7 @@ service_season = {
 
 # CEST = UTC + 2 h
 # CET  = UTC + 1 h
-summer_time = {
+summertime_season = {
     2016: {'start': dt(2016,  3, 27, 2, 0, tzinfo=tz.utc),
            'end':   dt(2016, 10, 30, 3, 0, tzinfo=tz.utc)},
     2017: {'start': dt(2017,  3, 26, 2, 0, tzinfo=tz.utc),
