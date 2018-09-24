@@ -246,12 +246,17 @@ def fill_met_data(df_met, df_date, time_delta_minutes):
     row per delta_'''
     df_joined = pd.merge(df_date, df_met, left_on='DateTime', right_on='index',
                          how='left')
-
+    df_joined.drop(columns=['index'], inplace=True)
     # fill observed variables
+    interpolate_only  = {'solar_elevation_angle'}
+    interpolate_extra = {'air_temperature', 'max(wind_speed PT1H)',
+                         'max_wind_speed(wind_from_direction PT1H)',
+                         'relative_humidity', 'sum(precipitation_amount PT1H)'}
     fill_3h_backwards = {'weather_type'}
     fill_6h_backwards = {'over_time(weather_type_primary_significance PT6H)',
                          'over_time(weather_type_secondary_significance PT6H)'}
-    fill_1h_backwards = set(df_joined.columns) - fill_3h_backwards - fill_6h_backwards
+    fill_1h_backwards = set(df_joined.columns) - fill_3h_backwards \
+                        - fill_6h_backwards - interpolate_only
     limit_1h = int(60 / time_delta_minutes - 1)
     limit_3h = int(180 / time_delta_minutes - 1)
     limit_6h = int(360 / time_delta_minutes - 1)
@@ -262,10 +267,11 @@ def fill_met_data(df_met, df_date, time_delta_minutes):
     for var in fill_1h_backwards:
         df_joined[var].fillna(method='backfill', limit=limit_1h, inplace=True)
 
-    # for some variable we allow us to stretch the filling a bit more with interpolation
-    for var in ['air_temperature', 'max(wind_speed PT1H)',
-                'max_wind_speed(wind_from_direction PT1H)',
-                'relative_humidity', 'sum(precipitation_amount PT1H)']:
+    # for some variable we allow us to stretch the filling a bit more with
+    # interpolation; note that these were filled up to a range already above,
+    # i.e. they are different from the solar elevation which is only
+    # interpolated
+    for var in interpolate_only | interpolate_extra:
         df_joined[var].interpolate(method='linear', inplace=True)
     '''
     # A lot of the rows are missing data in the met columns. This seems to be due to missing observations, mainly (but not all) at night. See also further below.
@@ -278,7 +284,7 @@ def fill_met_data(df_met, df_date, time_delta_minutes):
             plt.show()
     print(len(df_joined.index))
     '''
-    return df_met
+    return df_joined
 
 def transform_variables(df_met):
     # 1) Assign shorter, easy-to-understand column names.
@@ -309,5 +315,10 @@ def transform_variables(df_met):
     # 3) Transform the weather observations to something simpler.
     df_met = _met_transform_weather(df_met)
 
-
     return df_met
+
+
+def sun_below_horizon(df_met):
+    for index, row in df_met.iterrows():
+        if row['solar_elevation_angle'] < 0 and row['sunshine'] > 0:
+            print(index, row)
