@@ -9,6 +9,7 @@ import sys
 import bysykkel_data
 import calendar_interim
 import met_interim
+import sun_interim
 
 project_dir = os.sep.join([os.getcwd(), '..', '..'])
 sys.path.append(os.sep.join([project_dir, 'src']))
@@ -46,7 +47,7 @@ def main(input_dir, output_dir, process_bike_data,
         # df_date.to_feather(os.sep.join([output_dir, 'days.feather']))
         df_date.to_csv(os.sep.join([output_dir, 'days.csv']), index=False)
 
-    if process_met_data:
+    if process_met_data: # includes the solar elevation
         logger.info('Get met data from raw.')
         df_met = pd.read_feather(os.sep.join([input_dir,
                                               'blindern_met.feather']))
@@ -55,11 +56,20 @@ def main(input_dir, output_dir, process_bike_data,
                               parse_dates=[0], infer_datetime_format=True)
         df_date['DateTime'] = df_date['DateTime'].dt.tz_localize('UTC')
 
+        # Compute the solar elevation per hour; interpolate in fill_met_data.
+        df_met = sun_interim.create_solar_elevation_column(df_met)
+
+        logger.info('Running met_interim.fill_met_data.')
         df_met = met_interim.fill_met_data(
             df_met, df_date, bysykkel_parameters.time_delta_minutes)
+        logger.info('Running met_interim.transform_variables.')
         df_met = met_interim.transform_variables(df_met)
 
-        df_met.to_csv(os.sep.join([output_dir, 'blindern_interim.csv']))
+        if False:
+            df_met = met_interim.sun_below_horizon(df_met)
+
+        df_met.to_csv(os.sep.join([output_dir, 'blindern_interim.csv']),
+                      index=False)
         df_met.to_feather(os.sep.join([output_dir, 'blindern_interim.feather']))
         logger.info('Done writing met data interim file.')
 
