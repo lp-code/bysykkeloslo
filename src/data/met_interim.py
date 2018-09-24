@@ -273,18 +273,13 @@ def fill_met_data(df_met, df_date, time_delta_minutes):
     # interpolated
     for var in interpolate_only | interpolate_extra:
         df_joined[var].interpolate(method='linear', inplace=True)
-    '''
-    # A lot of the rows are missing data in the met columns. This seems to be due to missing observations, mainly (but not all) at night. See also further below.
-    import matplotlib.pyplot as plt
-    for v in df_joined.columns:
-        na = df_joined[v].isna().sum()
-        if na != 0:
-            print(v, na)
-            plt.hist(df_joined[df_joined[v].isna()].hour)
-            plt.show()
-    print(len(df_joined.index))
-    '''
+
+    # The sunshine-variable is the only one that has nan-values left now.
+    # Let's set these to zero.
+    df_joined['sum(duration_of_sunshine PT1H)'].fillna(value=0, inplace=True)
+
     return df_joined
+
 
 def transform_variables(df_met):
     # 1) Assign shorter, easy-to-understand column names.
