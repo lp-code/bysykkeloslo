@@ -25,7 +25,7 @@ def main(input_dir, output_dir):
     df_nf = net_flow.compute_net_flow(input_dir,
                                       bysykkel_parameters.service_season,
                                       bysykkel_parameters.time_delta_minutes)
-    logger.info('Bicycle data, net flow done.' + os.linesep + 'git s datasets.')
+    logger.info('Bicycle data, net flow done.' + os.linesep + 'Join datasets.')
 
     df_joined = pd.merge(df_met, df_nf, left_on='DateTime', right_on='index',
                          how='left')
