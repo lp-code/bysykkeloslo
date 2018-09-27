@@ -260,12 +260,18 @@ def fill_met_data(df_met, df_date, time_delta_minutes):
     limit_1h = int(60 / time_delta_minutes - 1)
     limit_3h = int(180 / time_delta_minutes - 1)
     limit_6h = int(360 / time_delta_minutes - 1)
-    for var in fill_3h_backwards:
-        df_joined[var].fillna(method='backfill', limit=limit_3h, inplace=True)
-    for var in fill_6h_backwards:
-        df_joined[var].fillna(method='backfill', limit=limit_6h, inplace=True)
-    for var in fill_1h_backwards:
-        df_joined[var].fillna(method='backfill', limit=limit_1h, inplace=True)
+    if limit_3h > 0:
+        for var in fill_3h_backwards:
+            df_joined[var].fillna(method='backfill', limit=limit_3h,
+                                  inplace=True)
+    if limit_6h > 0:
+        for var in fill_6h_backwards:
+            df_joined[var].fillna(method='backfill', limit=limit_6h,
+                                  inplace=True)
+    if limit_1h > 0:
+        for var in fill_1h_backwards:
+            df_joined[var].fillna(method='backfill', limit=limit_1h,
+                                  inplace=True)
 
     # for some variable we allow us to stretch the filling a bit more with
     # interpolation; note that these were filled up to a range already above,
