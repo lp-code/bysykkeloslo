@@ -68,9 +68,6 @@ Project Organization
         ├── data           <- Scripts to download or generate data
         │   └── make_dataset.py
         │
-        ├── features       <- Scripts to turn raw data into features for modeling
-        │   └── build_features.py
-        │
         ├── models         <- Scripts to train models and then use trained models to make
         │   │                 predictions
         │   ├── predict_model.py
@@ -81,6 +78,8 @@ Project Organization
 
 
 --------
+<!-- Requirements files: conda list -e > requirements_conda.txt
+                         pip freeze > requirements_pip.txt -->
 <!--
 <p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
 -->
