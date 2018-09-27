@@ -1,6 +1,6 @@
 Bysykkel Oslo
 ==============================
-![Bysykkel Oslo Project Logo](/docs/bike_gh2.jpg)
+![Bysykkel Oslo Project Logo](/docs/bike_gh2.jpg | width=200)
 
 Analyse the trip data from the bicycle sharing scheme in Oslo and create a
 machine-learning-based net demand predictor.
@@ -12,7 +12,7 @@ Prerequisites
 The code has been developed under Windows using the
 [Anaconda Python distribution](https://www.anaconda.com/download/),
 with Python version 3.6. Package dependencies for Anaconda and pip can be found
-in the `<requirements_*.txt>` files in the repository.
+in the `requirements_*.txt` files in the repository.
 
 
 Data sources and processing pipeline
@@ -22,7 +22,7 @@ Preparations:
 1. Download the bicycle trip data as csv files from https://developer.oslobysykkel.no/data
 1. Get a client ID for the Norwegian Meteorological office's Frost API, see the instructions
    [here](https://frost.met.no/auth/requestCredentials.html); assign the string to the
-   variable `<client_id>` in the file `<frost_account.py>` in the `<src/data>` directory.
+   variable `client_id` in the file `frost_account.py` in the `src/data` directory.
 
 
 data directory:| raw (10_get_data.py)            | interim (20_process_raw2interim.py)                                | processed (30_process_interim2processed.py)
