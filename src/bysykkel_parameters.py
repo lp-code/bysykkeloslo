@@ -8,7 +8,7 @@ from datetime import datetime as dt
 from datetime import timezone as tz
 
 max_trip_duration_seconds = 4 * 3600
-time_delta_minutes = 5
+time_delta_minutes = 60
 
 # All time data is in UTC (both met and trip data).
 service_season = {
