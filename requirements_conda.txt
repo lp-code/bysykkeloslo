@@ -14,14 +14,14 @@ blosc=1.14.3=he51fdeb_0
 bokeh=0.13.0=py36_0
 bzip2=1.0.6=hfa6e2cd_5
 ca-certificates=2018.03.07=0
-certifi=2018.4.16=py36_0
+certifi=2018.8.24=py36_1
 cffi=1.11.5=py36h945400d_0
 chardet=3.0.4=py36_1
 click=6.7=py36hec8c647_0
 cloudpickle=0.5.3=py36_0
 colorama=0.3.9=py36h029ae33_0
 constantly=15.1.0=py36_0
-cryptography=2.2.2=py36hfa6e2cd_0
+cryptography=2.3.1=py36h74b6da3_0
 cycler=0.10.0=py36h009560c_0
 cymem=1.31.2=py36h51d26f2_0
 cytoolz=0.8.2=py36h547e66e_0
@@ -93,7 +93,7 @@ numexpr=2.6.5=py36hcd2f87e_0
 numpy=1.14.5=py36h9fa60d3_4
 numpy-base=1.14.5=py36h5c71026_4
 olefile=0.45.1=py36_0
-openssl=1.0.2o=h8ea7d77_0
+openssl=1.0.2p=hfa6e2cd_0
 packaging=17.1=py36_0
 pandas=0.23.3=py36h830ac7b_0
 pandoc=2.2.1=h1a437c5_0
