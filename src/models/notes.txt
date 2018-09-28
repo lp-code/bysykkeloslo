@@ -1,0 +1,5 @@
+From the grid search, one line per station:
+{'max_depth': 11, 'min_samples_leaf': 0.001, 'min_samples_split': 0.01,  'n_estimators': 30}
+{'max_depth':  7, 'min_samples_leaf': 0.001, 'min_samples_split': 0.001, 'n_estimators': 25}
+{'max_depth':  9, 'min_samples_leaf': 0.001, 'min_samples_split': 0.001, 'n_estimators': 30}
+{'max_depth':  7, 'min_samples_leaf': 0.001, 'min_samples_split': 0.01,  'n_estimators': 30}
