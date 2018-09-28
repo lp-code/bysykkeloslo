@@ -1,6 +1,7 @@
 Bysykkel Oslo
 ==============================
-![Bysykkel Oslo Project Logo](/docs/bike_gh2.jpg | width=200)
+<!--  ![Bysykkel Oslo Project Logo](/docs/bike_gh2.jpg | width=200)  -->
+<img src="docs/bike_gh2.jpg" alt="Bysykkel Oslo Project Logo" width="200"/>
 
 Analyse the trip data from the bicycle sharing scheme in Oslo and create a
 machine-learning-based net demand predictor.
