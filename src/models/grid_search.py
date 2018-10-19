@@ -18,7 +18,7 @@ from sklearn.metrics import mean_squared_error
 
 def error_func(*args):
     r = np.sqrt(mean_squared_error(*args))
-    print('RMSE: %9.3f' % (r))
+    #print('RMSE: %9.3f' % (r))
     return r
 
 

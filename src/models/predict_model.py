@@ -4,6 +4,7 @@ import os
 import pandas as pd
 import pprint
 import re
+import seaborn as sns
 import sys
 import tqdm
 
@@ -14,7 +15,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from sklearn.externals import joblib
 
-write_model_file = True
+write_model_file = False # True
 
 project_dir = os.sep.join([os.getcwd(), '..', '..'])
 processed_data_dir = os.sep.join([project_dir, 'data', 'processed'])
@@ -44,6 +45,7 @@ for v in cat_vars:
     # @todo Are all "ordered"? Check whether it changes the model if not.
 
 regr_model = {}
+feature_importances = []
 for station in tqdm.tqdm(result_vars):
     station_first_used = df_first_use.loc[
         df_first_use.station_id == int(station)]['first_use'][0]
@@ -85,8 +87,12 @@ for station in tqdm.tqdm(result_vars):
         joblib.dump(regr, os.sep.join([model_dir,
                                        'rf50_'+str(station)+'.joblib']))
 
+    feature_importances.append(dict(zip(X_train.columns,
+                                        regr.feature_importances_)))
+                                            
 
-pprint.pprint(regr_model)
+df_fi = pd.DataFrame(feature_importances)
+df_fi.to_feather('feature_importances.feather')
 
 df_stats = pd.DataFrame.from_dict(data=regr_model,
                                   orient='index',
