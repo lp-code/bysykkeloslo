@@ -21,7 +21,7 @@ cryptography==3.3.2
 cssselect==1.1.0
 cycler==0.10.0
 cymem==2.0.3
-dask==2.11.0
+dask==2021.10.0
 decorator==4.4.1
 defusedxml==0.6.0
 descartes==1.1.0
