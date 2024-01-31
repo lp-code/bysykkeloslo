@@ -17,7 +17,7 @@ cmd2==0.8.9
 colorama==0.4.3
 configparser==4.0.2
 constantly==15.1.0
-cryptography==42.0.0
+cryptography==42.0.2
 cssselect==1.1.0
 cycler==0.10.0
 cymem==2.0.3
