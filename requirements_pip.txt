@@ -148,6 +148,6 @@ win-inet-pton==1.1.0
 wincertstore==0.2
 wrapt==1.12.0
 zict==1.0.0
-zipp==3.0.0
+zipp==3.19.1
 zope.interface==4.7.1
 setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
