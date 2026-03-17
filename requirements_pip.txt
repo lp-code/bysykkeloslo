@@ -99,7 +99,7 @@ psutil==5.7.0
 ptyprocess==0.6.0
 py==1.10.0
 pyarrow==14.0.1
-pyasn1==0.4.8
+pyasn1==0.6.3
 pyasn1-modules==0.2.8
 pycparser==2.19
 Pygments==2.15.0
