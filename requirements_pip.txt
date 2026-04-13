@@ -109,7 +109,7 @@ pyperclip==1.7.0
 pyreadline==2.1
 pyrsistent==0.15.7
 PySocks==1.7.1
-pytest==5.3.5
+pytest==9.0.3
 python-dateutil==2.8.1
 python-utils==2.3.0
 pytz==2019.3
